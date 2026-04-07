@@ -1,0 +1,10 @@
+name: "fake-news-verifier"
+version: "1.0.0"
+env_class: "server.logic.FakeNewsLogic"
+tasks:
+  - id: "easy"
+    name: "Easy: Historical Fact"
+  - id: "medium"
+    name: "Medium: Current Events"
+  - id: "hard"
+    name: "Hard: Contextual Misinformation"
