@@ -1,10 +1,17 @@
 name: "fake-news-verifier"
 version: "1.0.0"
 env_class: "server.logic.FakeNewsLogic"
+description: "Simulates a fact-checking task where an agent verifies news headlines."
+
 tasks:
   - id: "task-1"
-    name: "Task 1: Historical Fact"
+    name: "Easy: Historical Fact"
+    grader: "server.tasks.grader1"
+
   - id: "task-2"
-    name: "Task 2: Current Events"
+    name: "Medium: Current Events"
+    grader: "server.tasks.grader2"
+
   - id: "task-3"
-    name: "Task 3: Contextual Misinformation"
+    name: "Hard: Contextual Misinformation"
+    grader: "server.tasks.grader3"
