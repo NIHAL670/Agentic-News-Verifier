@@ -35,7 +35,7 @@ class FakeNewsLogic:
             }
         }
 
-        # 🔥 IMPORTANT
+        self.tasks = ["task-1", "task-2", "task-3"]
         self.reset("task-1")
 
 
