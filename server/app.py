@@ -1,118 +1,57 @@
-import asyncio
-import os
-import threading
+from fastapi import FastAPI, Request
+from server.logic import FakeNewsLogic, NewsAction
 import uvicorn
-import time
-import textwrap
-import re
-import sys
-from openai import OpenAI
-from server.main import app  
-from server.logic import NewsAction, NewsObservation
 
-# Environment Variables
-API_KEY = os.getenv("HF_TOKEN")
-MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+# Environment initialization
+app = FastAPI()
+env_logic = FakeNewsLogic()
 
-SYSTEM_PROMPT = """
-You are a Fact-Checking Agent. Verify if the news is True or False.
-Actions:
-1. search(keywords): To find evidence.
-2. verify(True) or verify(False): For final verdict.
-Reply ONLY with action call, e.g., search(moon) or verify(False).
-"""
+@app.get("/")
+def read_root():
+    return {"status": "running", "message": "Meta PyTorch Hackathon Environment Ready"}
 
-def parse_action(response):
-    match = re.search(r"(\w+)\((.*)\)", response)
-    if match:
-        return match.group(1).lower(), match.group(2).strip().replace("'", "").replace('"', "")
-    return "verify", "False"
-
-async def run_agent():
-    # Server ko fully load hone ka time dete hain
-    await asyncio.sleep(12) 
-    
-    print("\n" + "="*30, flush=True)
-    print("[AGENT] Starting Full Evaluation (3 Tasks)", flush=True)
-    print("="*30 + "\n", flush=True)
-    
-    from server.main import env_logic
-    client_llm = OpenAI(base_url="https://router.huggingface.co/v1", api_key=API_KEY)
-    
-    # 1. Teeno tasks define karo
-    tasks = ["easy", "medium", "hard"]
-
-    for task_id in tasks:
-        print(f"\n>>> RUNNING TASK: {task_id.upper()}", flush=True)
-        
-        # 2. Environment ko current task_id ke saath reset karo
-        obs = env_logic.reset(task_id)
-        print(f"[START] Headline: {obs.headline}", flush=True)
-        sys.stdout.flush()
-
-        # Har task ke liye maximum 5 steps
-        for step in range(1, 6):
-            prompt = f"Headline: {obs.headline}\nEvidence: {obs.evidence}\nAction:"
-            
-            try:
-                completion = client_llm.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": prompt}
-                    ],
-                    max_tokens=60,
-                    temperature=0 # Consistency ke liye 0 rakhein
-                )
-                
-                raw_action = completion.choices[0].message.content.strip()
-                action_type, content = parse_action(raw_action)
-                
-                # logic.py mein step execute karo
-                action_obj = NewsAction(action_type=action_type, query_or_label=content)
-                obs, reward, done = env_logic.step(action_obj)
-                
-                print(f"[{task_id.upper()} - STEP {step}] Action: {raw_action} | Reward: {reward:.2f}", flush=True)
-                sys.stdout.flush()
-                
-                if done:
-                    status = "SUCCESS" if reward >= 1.0 else "FAILED"
-                    print(f"[RESULT] {task_id.upper()} Task {status} | Total Score: {reward:.2f}", flush=True)
-                    break
-            except Exception as e:
-                print(f"[ERROR] Task {task_id} failed at step {step}: {e}", flush=True)
-                break
-        
-        # Task ke beech mein chhota gap (optional)
-        await asyncio.sleep(2)
-
-    print("\n" + "="*30, flush=True)
-    print("[FINISH] All Meta Tasks Attempted!", flush=True)
-    print("="*30, flush=True)
-    sys.stdout.flush()
-
-# --- MAIN RUNNER ---
-if __name__ == "__main__":
-    # 1. Server ko separate thread mein start karo
-    config = uvicorn.Config(app, host="0.0.0.0", port=7860, log_level="info")
-    server = uvicorn.Server(config)
-    
-    thread = threading.Thread(target=server.run)
-    thread.start()
-
-    # 2. Agent ko main loop mein chalao
+@app.post("/reset")
+async def reset(request: Request):
     try:
-        asyncio.run(run_agent())
-    except KeyboardInterrupt:
-        pass
-    finally:
-        # Space ko zinda rakhne ke liye server ko join karo
-        thread.join()
-# server/app.py ke end mein ye hona chahiye:
+        data = await request.json()
+    except:
+        data = {}
+    
+    task_id = data.get("task_id")
+    # Humne logic.py mein random choice rakha hai, toh task_id None hone par bhi 
+    # ye 3 alag tasks mein se koi ek pick karega.
+    observation = env_logic.reset(task_id)
+    
+    return {
+        "observation": observation,
+        "info": {"task_id": env_logic.current_task_id}
+    }
+
+@app.post("/step")
+async def step(request: Request):
+    try:
+        data = await request.json()
+    except:
+        return {"error": "Invalid JSON"}
+
+    action_data = data.get("action", {})
+    # Action object creation
+    action = NewsAction(**action_data)
+    
+    # logic.py se results lena
+    observation, reward, done, info = env_logic.step(action)
+    
+    # Meta ko return karna
+    return {
+        "observation": observation,
+        "reward": float(reward),
+        "done": bool(done),
+        "info": info  # Is info mein hamara {"score": float} ja raha hai
+    }
+
 def main():
-    import uvicorn
-    # Yahan dhyan dena: ye server.app:app hona chahiye
-    uvicorn.run("server.app:app", host="0.0.0.0", port=7860, reload=False)
+    # Port 7860 Hugging Face Spaces ke liye standard hai
+    uvicorn.run(app, host="0.0.0.0", port=7860)
 
 if __name__ == "__main__":
     main()
