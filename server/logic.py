@@ -1,14 +1,17 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 from pydantic import BaseModel
+
 
 class NewsAction(BaseModel):
     action_type: str
     query_or_label: str
 
+
 class NewsObservation(BaseModel):
     headline: str
     evidence: str
     steps_left: int
+
 
 class FakeNewsLogic:
     def __init__(self):
@@ -17,20 +20,20 @@ class FakeNewsLogic:
                 "headline": "NASA confirms Moon is Swiss Cheese.",
                 "label": "false",
                 "base_evidence": "Basic science contradicts this.",
-                "search_results": "Scientific journals confirm rock/metal structure."
+                "search_results": "Scientific journals confirm rock/metal structure.",
             },
             "task-2": {
                 "headline": "New policy: 1000 units for all tomorrow.",
                 "label": "true",
                 "base_evidence": "Social media rumors.",
-                "search_results": "Official Gazette Vol 42 confirms Stimulus Act."
+                "search_results": "Official Gazette Vol 42 confirms Stimulus Act.",
             },
             "task-3": {
                 "headline": "Coffee leads to 20% IQ increase.",
                 "label": "false",
                 "base_evidence": "Viral blog post claim.",
-                "search_results": "Study found alertness increase, not IQ."
-            }
+                "search_results": "Study found alertness increase, not IQ.",
+            },
         }
 
         self.reset("task-1")
@@ -93,27 +96,43 @@ class FakeNewsLogic:
         }
 
 
-# server/tasks.py
+def _safe_score(value: float) -> float:
+    """
+    Clamp scores to be strictly between 0 and 1.
+    """
+    if value is None:
+        return 0.01
+    value = float(value)
+    if value <= 0.0:
+        return 0.01
+    if value >= 1.0:
+        return 0.99
+    return value
 
-from typing import Dict, Any, List
 
-def fake_news_grader(output: Dict[str, Any], expected: Dict[str, Any]) -> bool:
+def fake_news_grader(output: Dict[str, Any], expected: Dict[str, Any]) -> float:
+    """
+    Returns a numeric score strictly between 0 and 1.
+    Avoids boolean return values that can be interpreted as 0/1.
+    """
     if not isinstance(output, dict):
-        return False
+        return 0.01
+
+    score = 0.01  # never 0
 
     out_label = str(output.get("label", "")).strip().lower()
     exp_label = str(expected.get("label", "")).strip().lower()
 
-    if out_label != exp_label:
-        return False
+    if out_label == exp_label:
+        score += 0.6
 
     expected_keyword = str(expected.get("required_keyword", "")).strip().lower()
     if expected_keyword:
         out_evidence = str(output.get("evidence", "")).strip().lower()
-        if expected_keyword not in out_evidence:
-            return False
+        if expected_keyword in out_evidence:
+            score += 0.39
 
-    return True
+    return _safe_score(score)
 
 
 tasks: List[Dict[str, Any]] = [
