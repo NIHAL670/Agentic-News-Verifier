@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from server.logic import FakeNewsLogic, NewsAction
+from fastapi.responses import JSONResponse
 import uvicorn
 
 app = FastAPI()
@@ -9,14 +10,15 @@ env_logic = FakeNewsLogic()
 def read_root():
     return {"status": "Success", "message": "Environment is Up and Running!"}
 
-# NEW: Validator isi endpoint se check karta hai ki 3 tasks hain ya nahi
-@app.get("/tasks")
+# SUCCESS FIX: Validator yahan se 3 tasks confirm karega
+@app.get("/tasks/")
 async def get_tasks():
-    return [
+    tasks_list = [
         {"id": "task-1", "name": "Easy: Historical Fact"},
         {"id": "task-2", "name": "Medium: Current Events"},
         {"id": "task-3", "name": "Hard: Contextual Misinformation"}
     ]
+    return JSONResponse(content=tasks_list)
 
 @app.post("/reset")
 async def reset(request: Request):
@@ -25,44 +27,41 @@ async def reset(request: Request):
     except:
         data = {}
         
-    task_id = data.get("task_id")
+    task_id = data.get("task_id", "task-1")
     observation = env_logic.reset(task_id)
     
-    return {
+    # Observation ko explicitly dictionary mein badalna zaroori hai
+    return JSONResponse(content={
         "observation": {
-            "headline": observation.headline,
-            "evidence": observation.evidence,
-            "steps_left": observation.steps_left
+            "headline": str(observation.headline),
+            "evidence": str(observation.evidence),
+            "steps_left": int(observation.steps_left)
         },
-        "info": {"task_id": env_logic.current_task_id}
-    }
+        "info": {"task_id": str(env_logic.current_task_id)}
+    })
 
 @app.post("/step")
 async def step(request: Request):
     try:
         data = await request.json()
-        # "action" key ke andar se data nikalna
-        action_data = data.get("action", {})
+        # Handle cases where action might be nested or direct
+        action_data = data.get("action", data)
         action = NewsAction(**action_data)
         
         observation, reward, done, info = env_logic.step(action)
         
-        return {
+        return JSONResponse(content={
             "observation": {
-                "headline": observation.headline,
-                "evidence": observation.evidence,
-                "steps_left": observation.steps_left
+                "headline": str(observation.headline),
+                "evidence": str(observation.evidence),
+                "steps_left": int(observation.steps_left)
             },
             "reward": float(reward),
             "done": bool(done),
             "info": info
-        }
+        })
     except Exception as e:
-        # Crash se bachne ke liye safe return
-        return {"error": str(e), "done": True, "reward": 0.05}
-
-def main():
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+        return JSONResponse(content={"error": str(e), "done": True, "reward": 0.05}, status_code=200)
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(app, host="0.0.0.0", port=7860)
