@@ -11,10 +11,23 @@ def read_root():
 
 @app.post("/reset")
 async def reset(request: Request):
-    data = await request.json()
+    try:
+        data = await request.json()
+    except:
+        data = {} # Agar validator khali body bheje toh crash na ho
+        
     task_id = data.get("task_id")
     observation = env_logic.reset(task_id)
-    return {"observation": observation, "info": {"task_id": env_logic.current_task_id}}
+    
+    # Return format ko thoda explicit banate hain
+    return {
+        "observation": {
+            "headline": observation.headline,
+            "evidence": observation.evidence,
+            "steps_left": observation.steps_left
+        },
+        "info": {"task_id": env_logic.current_task_id}
+    }
 
 @app.post("/step")
 async def step(request: Request):
