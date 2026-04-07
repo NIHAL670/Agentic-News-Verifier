@@ -13,19 +13,31 @@ class NewsObservation(BaseModel):
     steps_left: int
 
 class FakeNewsLogic:
-    def __init__(self):
+    def __init__(self):   
         self.task_data = {
-            "task-1": {"headline": "NASA confirms Moon is Swiss Cheese.", "label": "false", "base_evidence": "Basic science contradicts this.", "search_results": "Scientific journals confirm rock/metal structure."},
-            "task-2": {"headline": "New policy: 1000 units for all tomorrow.", "label": "true", "base_evidence": "Social media rumors.", "search_results": "Official Gazette Vol 42 confirms Stimulus Act."},
-            "task-3": {"headline": "Coffee leads to 20% IQ increase.", "label": "false", "base_evidence": "Viral blog post claim.", "search_results": "Study found alertness increase, not IQ."}
+            "task-1": {
+                "headline": "NASA confirms Moon is Swiss Cheese.",
+                "label": "false",
+                "base_evidence": "Basic science contradicts this.",
+                "search_results": "Scientific journals confirm rock/metal structure."
+            },
+            "task-2": {
+                "headline": "New policy: 1000 units for all tomorrow.",
+                "label": "true",
+                "base_evidence": "Social media rumors.",
+                "search_results": "Official Gazette Vol 42 confirms Stimulus Act."
+            },
+            "task-3": {
+                "headline": "Coffee leads to 20% IQ increase.",
+                "label": "false",
+                "base_evidence": "Viral blog post claim.",
+                "search_results": "Study found alertness increase, not IQ."
+            }
         }
-        # Plain list for internal tracking
-        self.available_tasks = [
-            {"id": "task-1", "name": "Easy: Historical Fact"},
-            {"id": "task-2", "name": "Medium: Current Events"},
-            {"id": "task-3", "name": "Hard: Contextual Misinformation"}
-        ]
+
+        # 🔥 IMPORTANT
         self.reset("task-1")
+
 
     def reset(self, task_id: str = None) -> NewsObservation:
         if not task_id or task_id not in self.task_data:
