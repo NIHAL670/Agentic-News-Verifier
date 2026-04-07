@@ -48,6 +48,9 @@ async def state():
         "steps_left": env_logic.steps_left,
         "done": env_logic.done
     }
+# server/main.py ke end mein ye hona chahiye:
+def main():
+    uvicorn.run("server.main:app", host="0.0.0.0", port=7860, reload=False)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    main()
