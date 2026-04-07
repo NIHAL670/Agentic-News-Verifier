@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request
-from server.logic import FakeNewsLogic, NewsAction
+from .logic import FakeNewsLogic, NewsAction
 from fastapi.responses import JSONResponse
 import uvicorn
-from server.tasks import tasks
+from .tasks import tasks
 
 app = FastAPI()
 env_logic = FakeNewsLogic()
@@ -15,9 +15,8 @@ def read_root():
 @app.get("/tasks/")
 async def get_tasks():
     tasks_list = [
-        {"id": "task-1", "name": "Easy: Historical Fact"},
-        {"id": "task-2", "name": "Medium: Current Events"},
-        {"id": "task-3", "name": "Hard: Contextual Misinformation"}
+        {"id": task["input"], "name": task["name"]}
+        for task in tasks
     ]
     return JSONResponse(content=tasks_list)
 
@@ -66,7 +65,7 @@ async def step(request: Request):
 
 def main():
     """Main entry point for the server."""
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    uvicorn.run(app, host="0.0.0.0", port=7861)
 
 if __name__ == "__main__":
     main()
