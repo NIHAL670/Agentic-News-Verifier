@@ -108,3 +108,11 @@ if __name__ == "__main__":
     finally:
         # Space ko zinda rakhne ke liye server ko join karo
         thread.join()
+# server/app.py ke end mein ye hona chahiye:
+def main():
+    import uvicorn
+    # Yahan dhyan dena: ye server.app:app hona chahiye
+    uvicorn.run("server.app:app", host="0.0.0.0", port=7860, reload=False)
+
+if __name__ == "__main__":
+    main()
