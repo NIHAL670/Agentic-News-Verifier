@@ -6,12 +6,18 @@ description: "Simulates a fact-checking task where an agent verifies news headli
 tasks:
   - id: "task-1"
     name: "Easy: Historical Fact"
+    input: "The Earth revolves around the Sun."
+    expected_output: "true"
     grader: "server.tasks.grader1"
 
   - id: "task-2"
     name: "Medium: Current Events"
+    input: "Aliens landed in Delhi yesterday."
+    expected_output: "false"
     grader: "server.tasks.grader2"
 
   - id: "task-3"
     name: "Hard: Contextual Misinformation"
+    input: "Drinking water cures all diseases."
+    expected_output: "false"
     grader: "server.tasks.grader3"
