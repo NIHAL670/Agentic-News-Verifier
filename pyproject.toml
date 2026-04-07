@@ -5,15 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "meta-fake-news-verifier"
 version = "0.1.0"
-description = "Agentic News Verification Environment for Meta Hackathon"
+description = "Agentic News Verification Environment"
 dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
     "openai",
     "python-dotenv",
-    "httpx"
+    "httpx",
+    "openenv>=0.2.0"
 ]
+
+[project.scripts]
+server = "server.main:main"
 
 [tool.setuptools]
 packages = ["server"]
