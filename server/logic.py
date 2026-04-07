@@ -57,33 +57,38 @@ class FakeNewsLogic:
 
     def step(self, action: NewsAction):
         if self.done:
-            return self._get_obs(), 0.0, True
+            # Done hone ke baad bhi reward 0.0 nahi, 0.01 rakho (safe side)
+            return self._get_obs(), 0.01, True
 
         self.steps_left -= 1
-        reward = 0.0
+        reward = 0.05  # Default small positive reward (0 nahi hona chahiye)
         
         # Action Logic
         if action.action_type == "search":
-            # Partial Reward (0.1) for gathering more information
+            # Partial Reward for gathering information
             if self.collected_evidence == self.current_task["base_evidence"]:
-                reward = 0.10
+                reward = 0.15 # 0.10 se thoda badha diya
                 self.collected_evidence = self.current_task["search_results"]
             else:
-                reward = 0.02 # Diminishing returns for repeat search
+                reward = 0.08 # Repeat search par bhi 0 se bada reward
             
         elif action.action_type == "verify":
             self.done = True
-            # Final Reward: 1.0 if correct, 0.0 if wrong
+            # FINAL SCORE FIX: 0 aur 1 ke beech hona chahiye
             if action.query_or_label.strip().lower() == self.current_task["label"].lower():
-                reward = 1.0
+                # Correct Answer: 1.0 ki jagah 0.95 do
+                reward = 0.95 
             else:
-                reward = 0.0
+                # Wrong Answer: 0.0 ki jagah 0.05 do
+                reward = 0.05
         
         # Max steps reached check
         if self.steps_left <= 0:
             self.done = True
+            if not self.done: # Agar bina verify kiye steps khatam hue
+                reward = 0.02
             
-        return self._get_obs(), reward, self.done
+        return self._get_obs(), float(reward), self.done
 
     def _get_obs(self) -> NewsObservation:
         return NewsObservation(
