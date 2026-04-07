@@ -1,26 +1,29 @@
-# Use a more specific and standard image
-FROM python:3.11
+# Standard lightweight image
+FROM python:3.10-slim
 
-# Set environment variables to prevent python from creating .pyc files
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Prevent python from buffering logs
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-# Install system dependencies if any (usually not needed for this task)
+# Only essential builds
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements first to leverage Docker cache
+# Pre-install critical tools
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy the rest
 COPY . .
 
-# Expose the port FastAPI runs on
+# Explicitly expose port
 EXPOSE 7860
 
-# Run using the module path
+# Start command
 CMD ["python", "-m", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
