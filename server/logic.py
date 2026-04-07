@@ -17,31 +17,31 @@ class FakeNewsLogic:
     def __init__(self):
         # Real-world scenarios: Easy (Obvious), Medium (Requires 1 search), Hard (Conflicting info)
         self.task_data = {
-            "easy": {
+            "task-1": {
                 "headline": "NASA confirms the Moon is made of 100% Swiss Cheese.",
                 "label": "False",
                 "base_evidence": "Basic planetary science contradicts this.",
                 "search_results": "Scientific journals confirm Moon is made of rock and metal."
             },
-            "medium": {
+            "task-2": {
                 "headline": "New government policy: All citizens to receive 1000 units of currency tomorrow.",
                 "label": "True",
                 "base_evidence": "Social media rumors are circulating.",
                 "search_results": "Official Government Gazette Vol 42 confirms the 'Economic Stimulus Act'."
             },
-            "hard": {
+            "task-3": {
                 "headline": "Study shows drinking coffee leads to immediate 20% increase in IQ.",
                 "label": "False",
                 "base_evidence": "A viral blog post claims this study is revolutionary.",
                 "search_results": "Original study found only temporary alertness, not IQ increase. Parody site misquoted the results."
             }
         }
-        self.reset("easy")
+        self.reset("task-1")
 
-    def reset(self, task_id: str = "easy") -> NewsObservation:
+    def reset(self, task_id: str = "task-1") -> NewsObservation:
         # Task ID handle karna zaroori hai
         if task_id not in self.task_data:
-            task_id = "easy"
+            task_id = "task-1"
             
         self.current_task_id = task_id
         self.current_task = self.task_data[task_id]
@@ -58,7 +58,7 @@ class FakeNewsLogic:
     def step(self, action: NewsAction):
         if self.done:
             # Done hone ke baad bhi reward 0.0 nahi, 0.01 rakho (safe side)
-            return self._get_obs(), 0.01, True
+            return self._get_obs(),float(reward), self.done, {"score": float(reward)}
 
         self.steps_left -= 1
         reward = 0.05  # Default small positive reward (0 nahi hona chahiye)
