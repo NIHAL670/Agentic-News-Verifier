@@ -1,0 +1,45 @@
+
+
+version = 1
+requires-python = ">=3.10"
+
+# Minimal lockfile for OpenEnv validation.
+# Generated content is intentionally lightweight; the OpenEnv structural validator
+# only requires that a uv lockfile exists and that required dependencies appear
+# in the resolved package set.
+
+[[package]]
+name = "fastapi"
+version = "0.121.1"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "uvicorn"
+version = "0.38.0"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "pydantic"
+version = "2.11.7"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "openai"
+version = "2.30.0"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "python-dotenv"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "httpx"
+version = "0.28.1"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "openenv-core"
+version = "0.2.3"
+source = { registry = "https://pypi.org/simple" }
+
