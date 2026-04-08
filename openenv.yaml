@@ -1,26 +1,31 @@
-name: "fake-news-verifier"
-version: "1.0.0"
-env_class: "server.logic.FakeNewsLogic"
-description: "Simulates a fact-checking task where an agent verifies news headlines."
+spec_version: 1
+name: fake-news-verifier
+type: space
+runtime: fastapi
+app: server.app:app
+port: 7860
 
 tasks:
-  - id: "task-1"
-    input:
-      headline: "NASA confirms Moon is Swiss Cheese."
-    expected_output:
-      label: "false"
-      required_keyword: "science"
+  - id: task-1
+    name: Verify headline 1
+    difficulty: easy
+    max_steps: 5
+    grader:
+      type: score
+      criteria: "Label false + keyword science"
 
-  - id: "task-2"
-    input:
-      headline: "New policy: 1000 units for all tomorrow."
-    expected_output:
-      label: "true"
-      required_keyword: "gazette"
+  - id: task-2
+    name: Verify headline 2
+    difficulty: medium
+    max_steps: 5
+    grader:
+      type: score
+      criteria: "Label true + keyword gazette"
 
-  - id: "task-3"
-    input:
-      headline: "Coffee leads to 20% IQ increase."
-    expected_output:
-      label: "false"
-      required_keyword: "study"
+  - id: task-3
+    name: Verify headline 3
+    difficulty: hard
+    max_steps: 5
+    grader:
+      type: score
+      criteria: "Label false + keyword study"
