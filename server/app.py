@@ -73,7 +73,7 @@ async def grade(req: GradeRequest):
         score = _safe_score(raw_score)
 
         return JSONResponse(content={
-            "score": score,
+            "score": float(round(max(0.01, min(0.99, score)), 4)),
             "feedback": f"Graded task {req.task_id}"
         })
     except Exception as e:
