@@ -117,7 +117,7 @@ async def step(req: ActionRequest):
                 "evidence": str(observation.evidence),
                 "steps_left": int(observation.steps_left)
             },
-            "reward": safe_reward,
+            "reward": float(round(max(0.01, min(0.99, safe_reward)), 4)),
             "done": bool(done),
             "info": {"score": safe_reward}
         })
