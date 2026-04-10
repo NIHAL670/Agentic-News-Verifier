@@ -20,7 +20,6 @@ def fake_news_grader(output: Dict[str, Any], expected: Dict[str, Any]) -> float:
     """
     Grade the agent's output against expected output.
     Returns a score strictly in (0, 1).
-
     Scoring breakdown:
     - Correct label match: +0.6
     - Required keyword found in evidence: +0.38
@@ -44,7 +43,7 @@ def fake_news_grader(output: Dict[str, Any], expected: Dict[str, Any]) -> float:
         if expected_keyword in out_evidence:
             score += 0.38
 
-    return max(0.01, min(0.99, score if score > 0 else 0.01))
+    return _safe_score(score)
 
 
 tasks: List[Dict[str, Any]] = [
