@@ -44,7 +44,7 @@ def fake_news_grader(output: Dict[str, Any], expected: Dict[str, Any]) -> float:
         if expected_keyword in out_evidence:
             score += 0.38
 
-    return _safe_score(score)
+    return max(0.01, min(0.99, score if score > 0 else 0.01))
 
 
 tasks: List[Dict[str, Any]] = [
