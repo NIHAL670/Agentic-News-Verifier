@@ -82,7 +82,7 @@ class FakeNewsLogic:
         elif action.action_type == "verify":
             self.done = True
             if action.query_or_label.strip().lower() == self.current_task["label"].lower():
-                reward = 0.80  # correct verdict
+                reward = 0.79  # correct verdict
             else:
                 reward = 0.05  # wrong verdict
 
