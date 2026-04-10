@@ -46,7 +46,7 @@ async def get_tasks():
             "difficulty": task.get("difficulty", "medium"),
             "max_steps": task.get("max_steps", 5),
             "input": task.get("input", {}),
-            "expected_output": task.get("expected_output", {}),
+            "expected_output": {"label": task.get("expected_output", {}).get("label", "")},
             "grader": {
                 "type": "score",
                 "criteria": task.get("expected_output", {})
