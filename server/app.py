@@ -46,7 +46,7 @@ async def get_tasks():
             "difficulty": task.get("difficulty", "medium"),
             "max_steps": task.get("max_steps", 5),
             "input": task.get("input", {}),
-            "expected_output": {"label": task.get("expected_output", {}).get("label", "")},
+            "expected_output": task.get("expected_output", {}),
             "grader": {
                 "type": "score",
                 "criteria": task.get("expected_output", {})
@@ -73,7 +73,7 @@ async def grade(req: GradeRequest):
         score = _safe_score(raw_score)
 
         return JSONResponse(content={
-            "score": float(round(max(0.01, min(0.99, score)), 4)),
+            "score": score,
             "feedback": f"Graded task {req.task_id}"
         })
     except Exception as e:
@@ -117,7 +117,7 @@ async def step(req: ActionRequest):
                 "evidence": str(observation.evidence),
                 "steps_left": int(observation.steps_left)
             },
-            "reward": float(round(max(0.01, min(0.99, safe_reward)), 4)),
+            "reward": safe_reward,
             "done": bool(done),
             "info": {"score": safe_reward}
         })
