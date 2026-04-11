@@ -84,7 +84,7 @@ async def grade(req: GradeRequest):
 
 @app.post("/reset")
 @app.post("/reset/")
-async def reset(req: ResetRequest = Body(default={"task_id": "task-1"})):
+async def reset(req: ResetRequest = None):
     """Reset the environment, optionally for a specific task."""
     if req is None or req.task_id is None:
         task_id = "task-1"
