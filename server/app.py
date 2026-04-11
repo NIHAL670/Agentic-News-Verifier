@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Any, Dict, Optional
 import uvicorn
+from fastapi import Body
 
 from server.logic import FakeNewsLogic, NewsAction, _safe_score
 from server.tasks import tasks, fake_news_grader
@@ -46,10 +47,8 @@ async def get_tasks():
             "difficulty": task.get("difficulty", "medium"),
             "max_steps": task.get("max_steps", 5),
             "input": task.get("input", {}),
-            "expected_output": task.get("expected_output", {}),
             "grader": {
-                "type": "score",
-                "criteria": task.get("expected_output", {})
+                "type": "score"
             }
         })
     return JSONResponse(content=tasks_list)
@@ -85,7 +84,7 @@ async def grade(req: GradeRequest):
 
 @app.post("/reset")
 @app.post("/reset/")
-async def reset(req: ResetRequest = None):
+async def reset(req: ResetRequest = Body(default={"task_id": "task-1"})):
     """Reset the environment, optionally for a specific task."""
     if req is None or req.task_id is None:
         task_id = "task-1"
